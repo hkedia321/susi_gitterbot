@@ -1,0 +1,79 @@
+
+.logo-img{
+	width: 100px;
+}
+nav{
+	padding: 0 10px;
+	color: #fff;
+	background-color: rgb(66, 133, 245);
+}
+.nav-wrapper,.nav-wrapper *{
+	background-color: rgb(66, 133, 245);
+}
+.gitter-but-img{
+	width: 30px;
+}
+.fa-gitter{
+	background-color: #fff;
+}
+.gitter-btn{
+	background-color: #e64980;
+}
+.gitter-btn .fa-gitter{
+	background-color: #e64980;
+}
+ul.steps-ul{
+	padding-left: 40px;
+}
+ul.steps-ul li{
+	list-style-type: disc;
+	line-height: 2.0;
+}
+.meetsusi-heading{
+	font-size: 2rem;
+}
+.heroku-btn{
+	transform: scale(1.2);
+}
+.color-purple{
+	color: #e64980;
+}
+.gitter-btn:hover{
+	background-color: #cb3c6e;
+}
+.step-row{
+	display: flex;
+	align-items:flex-start;
+	flex-wrap: wrap;
+}
+.one-step-box{
+	flex: 1 0 auto;
+}
+.one-step-box{
+	padding: 10px 20px;
+}
+footer .container-fluid{
+	background-color: #f6f6f6;
+	margin-top: 40px;
+	min-height: 100px;
+	padding-bottom: 10px;
+}
+footer .footer-logo{
+	margin-top: 50px;
+	width: 150px;
+}
+footer .footer-links-ul{
+}
+footer .footer-links-ul li{
+	display: inline-block;
+	margin-left: 15px;
+	margin-right: 15px;
+}
+footer .row{
+	margin-bottom: 0px;
+}
+@media (min-width: 769px){
+	.home-container{
+		padding: 0 20px;
+	}
+}

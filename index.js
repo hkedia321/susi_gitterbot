@@ -1,175 +1,131 @@
-require('dotenv').config()
-var https = require('https');
-var request = require('request');
-var http = require("http");
-var roomId    = process.env.ROOM_ID || config.ROOM_ID;
-var token     = process.env.TOKEN || config.TOKEN;
-var emptyMessage = " \n";
-var susiUsername="";
+/*jshint globalstrict:true, trailing:false, unused:true, node:true */
+"use strict";
 
-// To bind a port on heroku
-https.createServer(function (request, response) {
-    console.log("listening on port "+(process.env.PORT || 8080));
-}).listen(process.env.PORT || 8080);
-// ping heroku every 10 minutes to prevent it from sleeping
-setInterval(function() {
-    http.get(process.env.HEROKU_URL);
-}, 600000); // every 10 minutes
+var express         = require('express');
+var passport        = require('passport');
+var OAuth2Strategy  = require('passport-oauth2');
+var request         = require('request');
 
-const timezoneOffset = (new Date()).getTimezoneOffset();
-const defaultAnswer = {
-    data: [{
-        "0": "",
-        timezoneOffset,
-        language: "en"
-    }],
-    metadata: {
-        count: 1
-    },
-    actions: [{
-        type: "answer",
-        expression: "Hmm... I\'m not sure if i understand you correctly."
-    }],
-    skills: ["/en_0090_fail.json"],
-    persona: {}
-};
-// Setting the options variable to use it in the https request block
-var options = {
-    hostname: 'stream.gitter.im',
-    port:     443,
-    path:     '/v1/rooms/' + roomId + '/chatMessages',
-    method:   'GET',
-    headers:  {'Authorization': 'Bearer ' + token}
-};
-//make api call to get user name
-var gitterOptionsUsername = {
-    method: 'GET',
-    url: "https://api.gitter.im/v1/user",
-    headers:
-    {
-        'authorization': 'Bearer '+ token ,
-        'content-type': 'application/json',
-        'accept': 'application/json'
-    },
-    json: true
-};
-// making the request to Gitter API
-request(gitterOptionsUsername, function (error, response, body) {
-    if(error)
-    throw new Error(error);
-    susiUsername=body[0].username;
-});
-function sendAnswer(ans){
-    // To set options to send a message i.e. the reply by Susi AI to client's message, to Gitter
-    var gitterOptions = {
-        method: 'POST',
-        url: 'https://api.gitter.im/v1/rooms/'+roomId+'/chatMessages',
-        headers:
-        {
-            'authorization': 'Bearer '+ token ,
-            'content-type': 'application/json',
-            'accept': 'application/json'
-        },
-        body:
-        {
-            text: ans
-        },
-        json: true
+var gitterHost    = process.env.HOST || 'https://gitter.im';
+var port          = process.env.PORT || 8000;
+
+// Client OAuth configuration
+var clientId      = process.env.GITTER_KEY ? process.env.GITTER_KEY.trim() : "1aa9825fad1bf430e1ead10c3d05dc24e075e68b";
+var clientSecret  = process.env.GITTER_SECRET ? process.env.GITTER_SECRET.trim() : "1de732067b97ec27e4dbc84eca02880964dfaac8";
+
+// Gitter API client helper
+var gitter = {
+  fetch: function(path, token, cb) {
+    var options = {
+     url: gitterHost + path,
+     headers: {
+       'Authorization': 'Bearer ' + token
+     }
     };
 
-    // making the request to Gitter API
-    request(gitterOptions, function (error, response, body) {
-        if(error)
-        throw new Error(error);
-        console.log(body);
+    request(options, function (err, res, body) {
+      if (err) return cb(err);
+
+      if (res.statusCode === 200) {
+        cb(null, JSON.parse(body));
+      } else {
+        cb('err' + res.statusCode);
+      }
     });
-}
-// making a request to gitter stream API
-var req = https.request(options, function(res) {
-    res.on('data', function(chunk) {
-        var msg = chunk.toString();
-        if(msg != emptyMessage){
-            try{
-            var jsonMsg = JSON.parse(msg);
+  },
 
-            if(jsonMsg.text.startsWith("@"+susiUsername) && jsonMsg.fromUser.displayName !== susiUsername){
-                // The message sent to Susi AI gitter room by the client.
-                var clientMsg = jsonMsg.text.slice(susiUsername.length+1);
-                var ans = '';
-
-                // To set options for a request to Susi with the client message as a query
-                var susiOptions = {
-                    method: 'GET',
-                    url: 'http://api.susi.ai/susi/chat.json',
-                    qs: {  q: clientMsg }
-                };
-
-                // A request to the Susi AI API
-                request(susiOptions, function (error1, response1, body1) {
-                    if (error1)
-                    throw new Error(error1);
-
-                    var data = JSON.parse(body1);
-                    //handle default case of no answer
-                    if(!data.answers.length || data.answers.length===0){
-                        data.answers.push(defaultAnswer);
-                    }
-                    var answerActions = data.answers[0].actions;
-                    answerActions.forEach(function(action) {
-                        var type=action.type;
-                        // fetching the answer from Susi's response
-                        if(type === "rss"){
-                            ans += "I found this on the web-:\n\n";
-                            var maxCount=5;
-                            let rssData = JSON.parse(body1).answers[0].data;
-                            let columns = type[1];
-                            let key = Object.keys(columns);
-                            ans = "";
-                            rssData.forEach(function(row,index) {
-                                if(row<maxCount){
-                                  ans += ('Title : ');
-                                  ans += row.title+", ";
-                                  ans += ('Link : ');
-                                  ans += row.link+", ";
-                                  ans += '\n\n';
-                                }
-                              });
-                            sendAnswer(ans);
-                        }
-                        else if(type === "table"){
-                            var tableData = (JSON.parse(body1)).answers[0].data;
-                            var columnsObj=action.columns;
-                            var maxRows=50;
-                            let columns = Object.keys(columnsObj);
-                            var columnsData = Object.values(columnsObj);
-                            ans = "";
-                            tableData.forEach(function(row,index) {
-                                if(row[columns[0]] && index<maxRows){
-                                    let msg = "*"+row[columns[0]]+"*" + ", " + row[columns[1]] + "\n" + row[columns[2]]+ "\n ";
-                                    ans=ans+msg;
-                                }
-                            });
-                            ans += "\n";
-                            sendAnswer(ans);
-                        }
-                        else
-                        {
-                            ans = action.expression;
-                            sendAnswer(ans);
-                        }
-                    });
-                });
-            }
-        }
-        catch(err){
-            var error = true;
-        }
-        }
+  fetchCurrentUser: function(token, cb) {
+    this.fetch('/api/v1/user/', token, function(err, user) {
+      cb(err, user[0]);
     });
+  },
+
+  fetchRooms: function(user, token, cb) {
+    this.fetch('/api/v1/user/' + user.id + '/rooms', token, function(err, rooms) {
+      cb(err, rooms);
+    });
+  }
+};
+
+var app = express();
+
+// Middlewares
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+app.use(express.json());
+app.use(express.urlencoded());
+app.use(express.static( __dirname + '/public'));
+app.use(express.bodyParser());
+app.use(express.methodOverride());
+app.use(express.cookieParser());
+app.use(express.session({secret: 'keyboard cat'}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(app.router);
+
+// Passport Configuration
+
+passport.use(new OAuth2Strategy({
+    authorizationURL:   gitterHost + '/login/oauth/authorize',
+    tokenURL:           gitterHost + '/login/oauth/token',
+    clientID:           clientId,
+    clientSecret:       clientSecret,
+    callbackURL:        '/login/callback',
+    passReqToCallback:  true
+  },
+  function(req, accessToken, refreshToken, profile, done) {
+    req.session.token = accessToken;
+    gitter.fetchCurrentUser(accessToken, function(err, user) {
+      return (err ? done(err) : done(null, user));
+    });
+  }
+));
+
+passport.serializeUser(function(user, done) {
+  done(null, JSON.stringify(user));
 });
 
-req.on('error', function(e) {
-    console.log('Hey something went wrong: ' + e.message);
+passport.deserializeUser(function (user, done) {
+  done(null, JSON.parse(user));
 });
 
-req.end();
+app.get('/login',
+  passport.authenticate('oauth2')
+);
+
+app.get('/login/callback',
+  passport.authenticate('oauth2', {
+    successRedirect: '/rooms',
+    failureRedirect: '/'
+  })
+);
+
+app.get('/logout', function(req,res) {
+  req.session.destroy();
+  res.redirect('/');
+});
+
+app.get('/', function(req, res) {
+  res.render('index');
+});
+
+
+app.get('/rooms', function(req, res) {
+  if (!req.user) return res.redirect('/');
+
+  // Fetch user rooms using the Gitter API
+  gitter.fetchRooms(req.user, req.session.token, function(err, rooms) {
+    if (err) return res.send(500);
+
+    res.render('rooms', {
+      user: req.user,
+      token: req.session.token,
+      clientId: clientId,
+      rooms: rooms
+    });
+  });
+
+});
+
+app.listen(port);
+console.log('Demo app running at http://localhost:' + port);

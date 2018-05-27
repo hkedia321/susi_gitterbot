@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+    <link type="text/css" rel="stylesheet" href="/css/style.css"/>
+    <style>
+    .room-name{
+        overflow-wrap: break-word;
+    }
+    .rooms-cards-row{
+        display: flex;
+        flex-wrap: wrap;
+    }
+    .room-img{
+        width: 80px;
+    }
+    </style>
+    <title>SUSI Gitter Chatbot - Select Room</title>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.8/js/all.js"></script>
+</head>
+
+<body>
+    <nav>
+        <div class="nav-wrapper">
+            <a href="#" class="brand-logo"><img src="images/logo.png" class="logo-img responsive-img" /></a>
+            <ul id="nav-mobile" class="right hide-on-med-and-down">
+                <li>
+                    <a href="/logout" class="waves-effect waves-light btn gitter-btn"><i class="fab fa-gitter"></i> Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container-fluid home-container">
+        <div class="row">
+            <div class="col s12">
+                <h3 class="center color-purple"><i class="fab fa-gitter color-purple"></i> SUSI Gitter Chatbot</h3>
+            </div>
+        </div>
+        <div class="row">
+            <h4 class="center">Hello <%=user.username%>!</h4>
+            <h5 class="center">Select the Gitter Room to which you want to add SUSI bot</h5>
+            <h6>On clicking the "Deploy to heroku" button, you will be redirected to your heroku page to
+                create an app for your SUSI gitter bot. You can deploy SUSI bot to only one room for one heroku app.</h6>
+            </div>
+            <div class="row rooms-cards-row">
+                <% for(var i=0; i < rooms.length; i++) { %>
+                    <div class="col s6 m3">
+                        <div class="card one-step-box z-depth-2">
+                            <img src="<%=rooms[i].avatarUrl%>" class="room-img responsive-img" />
+                            <a target="_blank" href="https://gitter.im<%=rooms[i].url%>"><h6 class="room-name"><%=rooms[i].name%></h6></a>
+                            <a target="_blank" href="https://heroku.com/deploy?template=https://github.com/hkedia321/susi_gitterbot&env[ROOM_ID]=<%=rooms[i].id%>&env[TOKEN]=80eb0690510fbf869c2732e30918f40b7d38db26">
+                                <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy">
+                            </a>
+                        </div>
+                    </div>
+                    <%}%>
+                    <% if(rooms.length===0){%>
+                        <h5 class="center">No rooms found!</h5>
+                        <% } %>
+                    </div>
+                </div>
+                <!--Import jQuery before materialize.js-->
+                <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/js/materialize.min.js"></script>
+
+            </body>
+            </html>

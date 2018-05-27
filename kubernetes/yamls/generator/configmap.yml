@@ -1,5 +1,0 @@
-apiVersion: v1
-metadata:
-  name: susi-gitterbot
-  namespace: gitterbot
-kind: ConfigMap
