@@ -1,0 +1,28 @@
+{
+  "name": "susi_gitterbot",
+  "version": "1.0.0",
+  "description": "Integration of Susi AI to Gitter messenger",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fossasia/susi_gitterbot.git"
+  },
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "express": "~3.4.4",
+    "passport": "~0.2.0",
+    "passport-oauth2": "~1.1.1"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fossasia/susi_gitterbot/issues"
+  },
+  "homepage": "https://github.com/fossasia/susi_gitterbot#readme",
+  "devDependencies": {
+    "npm-run-all": "^4.1.3"
+  }
+}

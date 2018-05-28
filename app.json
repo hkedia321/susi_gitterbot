@@ -1,0 +1,7 @@
+{
+  "name": "SUSI Gitter chatbot",
+  "description": "Integrate SUSI AI in your gitter room and talk with it!",
+  "repository": "https://github.com/fossasia/susi_gitterbot",
+  "logo": "https://susi-gitter.herokuapp.com/susi.png",
+  "keywords": ["susi", "gitter", "node", "express", "static"]
+}
