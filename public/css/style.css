@@ -76,4 +76,7 @@ footer .row{
 	.home-container{
 		padding: 0 20px;
 	}
+	.landing-feature-img{
+		width: 80%;
+	}
 }

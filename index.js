@@ -10,6 +10,7 @@ var gitterHost    = process.env.HOST || 'https://gitter.im';
 var port          = process.env.PORT || 8000;
 
 // Client OAuth configuration
+// the API key and secret are those of the SUSI bot account
 var clientId      = process.env.GITTER_KEY ? process.env.GITTER_KEY.trim() : "1aa9825fad1bf430e1ead10c3d05dc24e075e68b";
 var clientSecret  = process.env.GITTER_SECRET ? process.env.GITTER_SECRET.trim() : "1de732067b97ec27e4dbc84eca02880964dfaac8";
 
